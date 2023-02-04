@@ -1,8 +1,6 @@
 use std::env;
-use std::path::Path;
 
 use d4ocr_rust::*;
-
 
 fn main() {
     let args = env::args().nth(1).expect("no image path");
@@ -18,10 +16,10 @@ fn main() {
     for i in res.unwrap() {
         if i == last_item {
             continue
-        }else{
+        } else {
             last_item = i
         }
         result.push_str(CHARSET[i as usize])
     }
-    println!("---------------->{:?}",result);
+    println!("---------------->{result:?}");
 }

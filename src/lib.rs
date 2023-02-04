@@ -1,18 +1,18 @@
-pub mod charset;
+use std::path::Path;
+
+use enum_dispatch::enum_dispatch;
+use image::GrayImage;
+use image::imageops::{crop, FilterType, resize};
+use serde::{Deserialize, Serialize};
+use serde_with::serde_as;
+use tract_onnx::prelude::*;
+use tract_onnx::prelude::{tract_ndarray::Array4, tract_ndarray::Ix4};
+use tract_onnx::prelude::{Tensor, tract_ndarray};
+use tract_onnx::tract_core::ndarray::Array;
 
 pub use charset::CHARSET;
 
-use std::path::Path;
-use enum_dispatch::enum_dispatch;
-use image::imageops::{crop, resize, FilterType};
-use image::GrayImage;
-use tract_onnx::prelude::*;
-use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
-use tract_onnx::prelude::{tract_ndarray::Array4, tract_ndarray::Ix4};
-use tract_onnx::prelude::{tract_ndarray, Tensor};
-use tract_onnx::tract_core::ndarray::Array;
-
+pub mod charset;
 
 #[enum_dispatch]
 #[derive(Clone, Serialize, Deserialize)]
@@ -111,8 +111,8 @@ impl GenericTransform for CenterCrop {
                 let mut image_cropped = image;
                 let image_cropped_new = crop(
                     &mut image_cropped,
-                    top as u32,
-                    left as u32,
+                    top,
+                    left,
                     self.crop_size.width as u32,
                     self.crop_size.height as u32,
                 );
@@ -284,7 +284,7 @@ impl TransformationPipeline {
     pub fn load_model(image_size: &ImageSize) -> TractSimplePlan {
         let name = "common.onnx";
         if !Path::new(name).exists(){
-            println!("{} is not find", name);
+            println!("{name} is not find");
             std::process::exit(-1)
         }
         let input_shape = tvec!(1, 1, image_size.height, image_size.width);
