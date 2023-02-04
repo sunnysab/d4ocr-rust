@@ -277,11 +277,11 @@ impl TransformationPipeline {
                 ToArray {}.into(),
                 ToTensor {}.into(),
             ],
-            model: TransformationPipeline::load_modal(&image_size),
+            model: TransformationPipeline::load_model(&image_size),
         }
     }
 
-    pub fn load_modal(image_size: &ImageSize) -> TractSimplePlan {
+    pub fn load_model(image_size: &ImageSize) -> TractSimplePlan {
         let name = "common.onnx";
         if !Path::new(name).exists(){
             println!("{} is not find", name);
@@ -314,9 +314,7 @@ impl TransformationPipeline {
     }
 
     pub fn extract_features(&self, image: GrayImage) -> Result<Vec<i64>, String> {
-        // println!("Transforming the image");
         let image_tensor = self.transform_image(&image).expect("Cannot transform image");
-        // println!("Running the model");
         let result = self
             .model
             .run(tvec!(image_tensor))
