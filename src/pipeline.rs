@@ -5,6 +5,7 @@ use image::GrayImage;
 use tract_onnx::prelude::Tensor;
 use tract_onnx::prelude::*;
 
+use super::MODEL_PATH;
 use super::{GenericTransform, ImageTransform};
 use super::{ImageSize, ResizeGrayImage, ToTensor};
 use super::{ImageTransformResult, ToArray};
@@ -36,14 +37,12 @@ impl TransformationPipeline {
     }
 
     pub fn load_model(image_size: &ImageSize) -> TractSimplePlan {
-        let name = "common.onnx";
-        if !Path::new(name).exists() {
-            println!("{name} is not find");
-            std::process::exit(-1)
+        if !Path::new(MODEL_PATH).exists() {
+            panic!("{MODEL_PATH} is not find");
         }
         let input_shape = tvec!(1, 1, image_size.height, image_size.width);
         let mut model = tract_onnx::onnx()
-            .model_for_path(name)
+            .model_for_path(MODEL_PATH)
             .expect("Cannot read model")
             .with_input_fact(0, InferenceFact::dt_shape(f32::datum_type(), input_shape))
             .unwrap();
@@ -51,8 +50,8 @@ impl TransformationPipeline {
         model.into_optimized().unwrap().into_runnable().unwrap()
     }
 
-    pub fn transform_image(&self, image: &GrayImage) -> Result<Tensor, &'static str> {
-        let mut result = ImageTransformResult::GrayImage(image.clone());
+    pub fn transform_image(&self, image: GrayImage) -> Result<Tensor, &'static str> {
+        let mut result = ImageTransformResult::GrayImage(image);
 
         for step in &self.steps {
             result = step.transform(result)?;
@@ -68,9 +67,7 @@ impl TransformationPipeline {
     }
 
     pub fn extract_features(&self, image: GrayImage) -> Result<Vec<i64>, String> {
-        let image_tensor = self
-            .transform_image(&image)
-            .expect("Cannot transform image");
+        let image_tensor = self.transform_image(image).expect("Cannot transform image");
         let result = self
             .model
             .run(tvec!(image_tensor))

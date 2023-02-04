@@ -8,10 +8,11 @@ pub use charset::CHARSET;
 pub use pipeline::TransformationPipeline;
 use transformer::{GenericTransform, ImageTransform};
 
-// submodules
 mod charset;
 mod pipeline;
 mod transformer;
+
+const MODEL_PATH: &str = "common.onnx";
 
 #[derive(Serialize, Deserialize)]
 #[serde(remote = "FilterType")]
