@@ -36,7 +36,7 @@ impl TransformationPipeline {
         }
     }
 
-    pub fn load_model(image_size: &ImageSize) -> TractSimplePlan {
+    fn load_model(image_size: &ImageSize) -> TractSimplePlan {
         if !Path::new(MODEL_PATH).exists() {
             panic!("{MODEL_PATH} is not find");
         }
@@ -50,7 +50,7 @@ impl TransformationPipeline {
         model.into_optimized().unwrap().into_runnable().unwrap()
     }
 
-    pub fn transform_image(&self, image: GrayImage) -> Result<Tensor, &'static str> {
+    fn transform_image(&self, image: GrayImage) -> Result<Tensor, &'static str> {
         let mut result = ImageTransformResult::GrayImage(image);
 
         for step in &self.steps {
@@ -66,7 +66,7 @@ impl TransformationPipeline {
         }
     }
 
-    pub fn extract_features(&self, image: GrayImage) -> Result<Vec<i64>, String> {
+    fn extract_features(&self, image: GrayImage) -> Result<Vec<i64>, String> {
         let image_tensor = self.transform_image(image).expect("Cannot transform image");
         let result = self
             .model
@@ -79,5 +79,21 @@ impl TransformationPipeline {
             .cloned()
             .collect();
         Ok(features)
+    }
+
+    pub fn recognize(&self, image: GrayImage) -> Result<String, String> {
+        let vec = self.extract_features(image)?;
+
+        let mut result = String::from("");
+        let mut last_item: i64 = 0;
+        for i in vec {
+            if i == last_item {
+                continue;
+            } else {
+                last_item = i
+            }
+            result.push_str(super::CHARSET[i as usize])
+        }
+        Ok(result)
     }
 }

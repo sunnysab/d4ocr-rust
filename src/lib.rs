@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use tract_onnx::prelude::{tract_ndarray::Array4, *};
 
-pub use charset::CHARSET;
+use charset::CHARSET;
 pub use pipeline::TransformationPipeline;
 use transformer::{GenericTransform, ImageTransform};
 
