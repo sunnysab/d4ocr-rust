@@ -70,7 +70,7 @@ impl TransformationPipeline {
         let image_tensor = self.transform_image(image).expect("Cannot transform image");
         let result = self
             .model
-            .run(tvec!(image_tensor))
+            .run(tvec!(image_tensor.into()))
             .expect("Cannot run model");
         let features: Vec<i64> = result[0]
             .to_array_view::<i64>()
